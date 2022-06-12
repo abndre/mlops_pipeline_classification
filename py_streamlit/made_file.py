@@ -11,13 +11,16 @@ input_data = {'age': {'tipo': 'int64', 'numerico': []},
  'charges': {'tipo': 'float64', 'numerico': []}}
 
 inputs_string = ""
+url = "http://127.0.0.1:8887/predict?"
 for key, value in input_data.items():
     if value.get('tipo') == 'object':
         tmp_str = f"        {key} = st.selectbox('Select {key}', {value['categoricos']})\n"
     else:
         tmp_str = f"        {key} = st.number_input('Insert {key}')\n"
     inputs_string +=tmp_str
+    url += f"{key}={{{key}}}&"
 
+url = url[:-1]
 
 query = f"""import streamlit as st
 import requests
@@ -46,7 +49,12 @@ def main():
 {inputs_string}
         submitted = st.form_submit_button("Submit")
         if submitted:
-            pass
+            url = f"{url}"
+            data = fetch(session, url)
+            if data:
+                st.write("Predict ", data)
+            else:
+                st.error("Error")
 
 
 if __name__ == '__main__':
